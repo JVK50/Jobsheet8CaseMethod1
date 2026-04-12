@@ -34,13 +34,13 @@ public class SistemPeminjamanBuku {
                     tampilkanDataBuku();
                     break;
                 case 3:
-                    inputDataPeminjaman();
+                    tampilkanDataPeminjaman();
                     break;
                 case 4:
-                    cariMahasiswaByNIM();
+                    sortingPeminjamanByDenda();
                     break;
                 case 5:
-                    sortingPeminjamanByNIM();
+                    cariPeminjamanByNIM();
                     break;
                 default:
                     System.out.println("Pilihan tidak valid!");
@@ -56,9 +56,9 @@ public class SistemPeminjamanBuku {
         System.out.println("\n========== MENU SISTEM PEMINJAMAN BUKU ==========");
         System.out.println("1. Tampilkan Data Mahasiswa");
         System.out.println("2. Tampilkan Data Buku");
-        System.out.println("3. Input Data Peminjaman");
-        System.out.println("4. Cari Mahasiswa by NIM");
-        System.out.println("5. Sorting Data Peminjaman by NIM");
+        System.out.println("3. Tampilkan Data Peminjaman");
+        System.out.println("4. Sorting Data Peminjaman by Denda");
+        System.out.println("5. Cari Peminjaman By NIM");
         System.out.println("0. Keluar");
         System.out.println("================================================");
     }
@@ -128,90 +128,126 @@ public class SistemPeminjamanBuku {
         System.out.println("==============================");
     }
 
-    // Metode untuk memasukkan data peminjaman baru
-    static void inputDataPeminjaman() {
-        System.out.println("\n========== INPUT DATA PEMINJAMAN ==========");
+    // Metode untuk menampilkan semua data peminjaman
+    static void tampilkanDataPeminjaman() {
+        System.out.println("\n========== DATA PEMINJAMAN ==========");
         
-        if (jumlahPeminjaman >= peminjaman.length) {
-            System.out.println("Array peminjaman sudah penuh!");
+        if (jumlahPeminjaman == 0) {
+            System.out.println("Tidak ada data peminjaman!");
             return;
         }
         
-        System.out.print("Masukkan NIM Mahasiswa: ");
-        String nim = scanner.nextLine();
-        
-        // Validasi NIM
-        int idxMahasiswa = cariMahasiswaByNIMHelper(nim);
-        if (idxMahasiswa == -1) {
-            System.out.println("Mahasiswa dengan NIM " + nim + " tidak ditemukan!");
-            return;
+        for (int i = 0; i < jumlahPeminjaman; i++) {
+            String namaMahasiswa = getMahasiswaNameByNIM(peminjaman[i].getNim());
+            System.out.println(namaMahasiswa + " | " + 
+                    peminjaman[i].getBuku().getJudul() + " | " +
+                    "Lama: " + peminjaman[i].getLamaPinjam() + " | " +
+                    "Terlambat: " + peminjaman[i].getTerbambat() + " | " +
+                    "Denda: " + peminjaman[i].getDenda());
         }
-        
-        System.out.print("Masukkan Kode Buku: ");
-        String kodeBuku = scanner.nextLine();
-        
-        // Validasi Kode Buku
-        int idxBuku = cariBukuByKode(kodeBuku);
-        if (idxBuku == -1) {
-            System.out.println("Buku dengan kode " + kodeBuku + " tidak ditemukan!");
-            return;
-        }
-        
-        System.out.print("Masukkan Lama Pinjam (hari): ");
-        int lamaPinjam = scanner.nextInt();
-        
-        System.out.print("Masukkan Hari Terbambat: ");
-        int terbambat = scanner.nextInt();
-        scanner.nextLine(); // Membersihkan newline
-        
-        peminjaman[jumlahPeminjaman] = new Peminjaman(nim, buku[idxBuku], lamaPinjam, terbambat);
-        jumlahPeminjaman++;
-        
-        System.out.println("Data peminjaman berhasil ditambahkan!");
-        System.out.println("Denda yang harus dibayar: Rp " + peminjaman[jumlahPeminjaman - 1].getDenda());
+        System.out.println("====================================");
     }
 
-    // Metode searching dengan linear search untuk mencari mahasiswa berdasarkan NIM
-    static void cariMahasiswaByNIM() {
-        System.out.println("\n========== CARI MAHASISWA BY NIM ==========");
+    // Metode helper untuk mendapatkan nama mahasiswa berdasarkan NIM
+    static String getMahasiswaNameByNIM(String nim) {
+        for (int i = 0; i < jumlahMahasiswa; i++) {
+            if (mahasiswa[i].getNim().equals(nim)) {
+                return mahasiswa[i].getNama();
+            }
+        }
+        return "Tidak ditemukan";
+    }
+
+    // Metode searching untuk mencari data peminjaman berdasarkan NIM
+    static void cariPeminjamanByNIM() {
+        System.out.println("\n========== CARI PEMINJAMAN BY NIM ==========");
         System.out.print("Masukkan NIM yang dicari: ");
         String nim = scanner.nextLine();
         
-        int idx = cariMahasiswaByNIMHelper(nim);
+        System.out.println("\n--- Hasil Pencarian ---");
+        boolean ditemukan = false;
         
-        if (idx != -1) {
-            System.out.println("\nData mahasiswa ditemukan:");
-            System.out.println("NIM        : " + mahasiswa[idx].getNim());
-            System.out.println("Nama       : " + mahasiswa[idx].getNama());
-            System.out.println("Prodi      : " + mahasiswa[idx].getProdi());
-        } else {
-            System.out.println("Mahasiswa dengan NIM " + nim + " tidak ditemukan!");
+        for (int i = 0; i < jumlahPeminjaman; i++) {
+            if (peminjaman[i].getNim().equals(nim)) {
+                String namaMahasiswa = getMahasiswaNameByNIM(peminjaman[i].getNim());
+                System.out.println(namaMahasiswa + " | " + 
+                        peminjaman[i].getBuku().getJudul() + " | " +
+                        "Lama: " + peminjaman[i].getLamaPinjam() + " | " +
+                        "Terlambat: " + peminjaman[i].getTerbambat() + " | " +
+                        "Denda: " + peminjaman[i].getDenda());
+                ditemukan = true;
+            }
         }
+        
+        if (!ditemukan) {
+            System.out.println("Tidak ada data peminjaman untuk NIM " + nim);
+        }
+        System.out.println("==========================================");
     }
 
-    // Helper method untuk melakukan linear search
+    // Helper method untuk melakukan binary search pada mahasiswa berdasarkan NIM
     static int cariMahasiswaByNIMHelper(String nim) {
-        for (int i = 0; i < jumlahMahasiswa; i++) {
-            if (mahasiswa[i].getNim().equals(nim)) {
-                return i;
+        int left = 0;
+        int right = jumlahMahasiswa - 1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            int comparison = mahasiswa[mid].getNim().compareTo(nim);
+            
+            if (comparison == 0) {
+                return mid;
+            } else if (comparison < 0) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
             }
         }
         return -1;
     }
 
-    // Helper method untuk mencari buku berdasarkan kode
+    // Helper method untuk mencari buku berdasarkan kode dengan binary search
     static int cariBukuByKode(String kodeBuku) {
-        for (int i = 0; i < jumlahBuku; i++) {
-            if (buku[i].getKodeBuku().equals(kodeBuku)) {
-                return i;
+        int left = 0;
+        int right = jumlahBuku - 1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            int comparison = buku[mid].getKodeBuku().compareTo(kodeBuku);
+            
+            if (comparison == 0) {
+                return mid;
+            } else if (comparison < 0) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
             }
         }
         return -1;
     }
 
-    // Metode sorting menggunakan selection sort
-    static void sortingPeminjamanByNIM() {
-        System.out.println("\n========== DATA PEMINJAMAN (SORTED BY NIM) ==========");
+    // Helper method untuk mencari peminjaman berdasarkan NIM dengan binary search
+    static int cariPeminjamanByNIMBinary(String nim) {
+        int left = 0;
+        int right = jumlahPeminjaman - 1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            int comparison = peminjaman[mid].getNim().compareTo(nim);
+            
+            if (comparison == 0) {
+                return mid;
+            } else if (comparison < 0) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return -1;
+    }
+
+    // Metode sorting menggunakan insertion sort 
+    static void sortingPeminjamanByDenda() {
+        System.out.println("\n========== DATA PEMINJAMAN (SORTED BY DENDA - TERBESAR DULU) ==========");
         
         if (jumlahPeminjaman == 0) {
             System.out.println("Tidak ada data peminjaman!");
@@ -224,44 +260,36 @@ public class SistemPeminjamanBuku {
             temp[i] = peminjaman[i];
         }
         
-        // Selection sort
-        selectionSort(temp);
-        
-        System.out.println(String.format("%-10s | %-20s | %-15s | %-15s | %-15s",
-                "NIM", "Judul Buku", "Lama Pinjam", "Terbambat", "Denda"));
-        System.out.println("-".repeat(80));
+        // insertion sort by Denda 
+        insertionSortByDenda(temp);
         
         for (int i = 0; i < jumlahPeminjaman; i++) {
-            System.out.println(String.format("%-10s | %-20s | %-15d | %-15d | %-15s",
-                    temp[i].getNim(),
-                    temp[i].getBuku().getJudul(),
-                    temp[i].getLamaPinjam(),
-                    temp[i].getTerbambat(),
-                    "Rp " + temp[i].getDenda()));
+            String namaMahasiswa = getMahasiswaNameByNIM(temp[i].getNim());
+            System.out.println(namaMahasiswa + " | " + 
+                    temp[i].getBuku().getJudul() + " | " +
+                    "Lama: " + temp[i].getLamaPinjam() + " | " +
+                    "Terlambat: " + temp[i].getTerbambat() + " | " +
+                    "Denda: " + temp[i].getDenda());
         }
-        System.out.println("===================================================================");
+        System.out.println("========================================================================");
     }
 
-    // Metode selection sort
-    static void selectionSort(Peminjaman[] arr) {
+    // Metode insertion sort by Denda 
+    static void insertionSortByDenda(Peminjaman[] arr) {
         int n = arr.length;
         
-        for (int i = 0; i < n - 1; i++) {
-            int minIndex = i;
+        for (int i = 1; i < n; i++) {
+            Peminjaman key = arr[i];
+            int j = i - 1;
             
-            for (int j = i + 1; j < n; j++) {
-                // Membandingkan NIM secara lexicographically
-                if (arr[j].getNim().compareTo(arr[minIndex].getNim()) < 0) {
-                    minIndex = j;
-                }
+            // Untuk descending order: geser elemen yang lebih kecil ke kanan
+            while (j >= 0 && arr[j].getDenda() < key.getDenda()) {
+                arr[j + 1] = arr[j];
+                j--;
             }
             
-            // Tukar elemen
-            if (minIndex != i) {
-                Peminjaman temp = arr[i];
-                arr[i] = arr[minIndex];
-                arr[minIndex] = temp;
-            }
+            // Sisipkan key pada posisi yang tepat
+            arr[j + 1] = key;
         }
     }
 }
