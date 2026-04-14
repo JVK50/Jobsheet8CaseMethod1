@@ -137,13 +137,22 @@ public class SistemPeminjamanBuku {
             return;
         }
         
+        // Copy data ke array temporary untuk sorting
+        Peminjaman[] temp = new Peminjaman[jumlahPeminjaman];
         for (int i = 0; i < jumlahPeminjaman; i++) {
-            String namaMahasiswa = getMahasiswaNameByNIM(peminjaman[i].getNim());
+            temp[i] = peminjaman[i];
+        }
+        
+        // insertion sort by Lama Pinjam
+        insertionSortByLamaPinjam(temp);
+        
+        for (int i = 0; i < jumlahPeminjaman; i++) {
+            String namaMahasiswa = getMahasiswaNameByNIM(temp[i].getNim());
             System.out.println(namaMahasiswa + " | " + 
-                    peminjaman[i].getBuku().getJudul() + " | " +
-                    "Lama: " + peminjaman[i].getLamaPinjam() + " | " +
-                    "Terlambat: " + peminjaman[i].getTerbambat() + " | " +
-                    "Denda: " + peminjaman[i].getDenda());
+                    temp[i].getBuku().getJudul() + " | " +
+                    "Lama: " + temp[i].getLamaPinjam() + " | " +
+                    "Terlambat: " + temp[i].getTerbambat() + " | " +
+                    "Denda: " + temp[i].getDenda());
         }
         System.out.println("====================================");
     }
@@ -284,6 +293,25 @@ public class SistemPeminjamanBuku {
             
             // Untuk descending order: geser elemen yang lebih kecil ke kanan
             while (j >= 0 && arr[j].getDenda() < key.getDenda()) {
+                arr[j + 1] = arr[j];
+                j--;
+            }
+            
+            // Sisipkan key pada posisi yang tepat
+            arr[j + 1] = key;
+        }
+    }
+
+    // Metode insertion sort by Lama Pinjam
+    static void insertionSortByLamaPinjam(Peminjaman[] arr) {
+        int n = arr.length;
+        
+        for (int i = 1; i < n; i++) {
+            Peminjaman key = arr[i];
+            int j = i - 1;
+            
+            // Untuk descending order: geser elemen yang lebih kecil ke kanan
+            while (j >= 0 && arr[j].getLamaPinjam() < key.getLamaPinjam()) {
                 arr[j + 1] = arr[j];
                 j--;
             }
